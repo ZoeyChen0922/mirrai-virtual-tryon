@@ -33,6 +33,8 @@ class handler(BaseHTTPRequestHandler):
                     "looks": {k: sorted(v) for k, v in core.LOOKS.items()},
                     "store": store.BACKEND,
                     "key": bool(core.KEY),  # whether OPENAI_API_KEY is set — never the value
+                    "key_check": {"ascii": (core.KEY or "").isascii(), "length": len(core.KEY or ""),
+                                  "prefix": (core.KEY or "")[:8]},  # "sk-proj-" is a public prefix, not secret
                     "store_env": store.env_names(),  # variable names only, to diagnose the storage connection
                     "missing_assets": missing_assets()}
         data = json.dumps(body).encode()

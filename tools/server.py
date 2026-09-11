@@ -23,6 +23,11 @@ TTL = 24 * 3600
 KEY = os.environ.get("OPENAI_API_KEY") or next(
     (l.split("=", 1)[1].strip() for l in ((ROOT / ".env").read_text().splitlines() if (ROOT / ".env").exists() else [])
      if l.startswith("OPENAI_API_KEY=")), None)
+if KEY:
+    # A key pasted with a full-width IME or wrapped in quotes/spaces breaks the HTTP header; NFKC maps
+    # full-width letters back to ASCII, and zero-width characters are dropped.
+    import unicodedata
+    KEY = "".join(ch for ch in unicodedata.normalize("NFKC", KEY) if ch.isprintable() and not ch.isspace()).strip("\"'")
 
 # Keep in sync with prototype/data.js (v3 — American-retro street looks, see tools/v3_build.py)
 LOOKS = {"L1": ["T7", "B9"], "L2": ["T8", "B10"], "L3": ["T9", "B11"], "L4": ["T10", "B12"], "L5": ["T11", "B13"],

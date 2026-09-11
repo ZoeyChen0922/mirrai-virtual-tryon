@@ -1,12 +1,15 @@
 """Tiny key-value store for the Vercel functions (serverless instances share no memory).
 Results and usage counters live here, each with an expiry.
 
-Backends, whichever is configured (both come from Vercel Marketplace integrations):
-  • Neon Postgres (free plan)  — POSTGRES_URL or DATABASE_URL
-  • Upstash Redis (REST)       — KV_REST_API_URL + KV_REST_API_TOKEN, or UPSTASH_REDIS_REST_URL + _TOKEN
+Backends, whichever is configured through a Vercel Marketplace integration:
+  • Redis (TCP)           — REDIS_URL  (redis:// or rediss://, e.g. the "Redis" integration)
+  • Upstash Redis (REST)  — KV_REST_API_URL + KV_REST_API_TOKEN, or UPSTASH_REDIS_REST_URL + _TOKEN
+  • Neon Postgres         — POSTGRES_URL or DATABASE_URL
+Variables with a custom prefix (e.g. STORAGE_REDIS_URL) are also recognised.
 """
 import json, os
 import requests
+
 
 def _env(*names, suffixes=()):
     """Exact names first, then any variable ending with a suffix — Vercel lets users add a custom prefix when connecting."""
@@ -19,9 +22,18 @@ def _env(*names, suffixes=()):
     return None
 
 
+TCP_REDIS = _env("REDIS_URL", suffixes=("_REDIS_URL",))
+if TCP_REDIS and not TCP_REDIS.startswith(("redis://", "rediss://")):
+    TCP_REDIS = None
+REST_URL = _env("KV_REST_API_URL", "UPSTASH_REDIS_REST_URL", suffixes=("_REST_API_URL", "_REDIS_REST_URL"))
+REST_TOKEN = _env("KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN", suffixes=("_REST_API_TOKEN", "_REDIS_REST_TOKEN"))
 PG_DSN = _env("POSTGRES_URL", "DATABASE_URL", suffixes=("_POSTGRES_URL", "_DATABASE_URL"))
-REDIS_URL = _env("KV_REST_API_URL", "UPSTASH_REDIS_REST_URL", suffixes=("_REST_API_URL", "_REDIS_REST_URL"))
-REDIS_TOKEN = _env("KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN", suffixes=("_REST_API_TOKEN", "_REDIS_REST_TOKEN"))
+
+BACKEND = "redis" if TCP_REDIS else "upstash" if (REST_URL and REST_TOKEN) else "postgres" if PG_DSN else None
+
+
+def available():
+    return BACKEND is not None
 
 
 def env_names():
@@ -30,8 +42,23 @@ def env_names():
     return sorted(k for k in os.environ if any(t in k for t in keys))
 
 
-def available():
-    return bool(PG_DSN or (REDIS_URL and REDIS_TOKEN))
+# ---------- Redis over TCP ----------
+_client = None
+
+
+def _tcp():
+    global _client
+    if _client is None:
+        import redis
+        _client = redis.from_url(TCP_REDIS, socket_timeout=10, socket_connect_timeout=10, decode_responses=True)
+    return _client
+
+
+# ---------- Upstash Redis over REST ----------
+def _rest(*args):
+    r = requests.post(REST_URL, headers={"Authorization": f"Bearer {REST_TOKEN}"}, json=[str(a) for a in args], timeout=10)
+    r.raise_for_status()
+    return r.json().get("result")
 
 
 # ---------- Postgres (Neon) ----------
@@ -46,47 +73,52 @@ def _pg(sql, args=(), fetch=False):
         return cur.fetchone() if fetch else None
 
 
-# ---------- Upstash Redis (REST) ----------
-def _redis(*args):
-    r = requests.post(REDIS_URL, headers={"Authorization": f"Bearer {REDIS_TOKEN}"}, json=[str(a) for a in args], timeout=10)
-    r.raise_for_status()
-    return r.json().get("result")
-
-
 # ---------- public API ----------
 def put(key, value, ttl=86400):
-    if PG_DSN:
+    if BACKEND == "redis":
+        _tcp().set(key, json.dumps(value), ex=ttl)
+    elif BACKEND == "upstash":
+        _rest("SET", key, json.dumps(value), "EX", ttl)
+    else:
         _pg("DELETE FROM mirrai_kv WHERE exp < now()")  # sweep expired rows (results must not outlive 24h)
         _pg("INSERT INTO mirrai_kv (k, v, exp) VALUES (%s, %s, now() + make_interval(secs => %s::float8)) "
             "ON CONFLICT (k) DO UPDATE SET v = excluded.v, exp = excluded.exp", (key, json.dumps(value), ttl))
-    else:
-        _redis("SET", key, json.dumps(value), "EX", ttl)
 
 
 def get(key):
-    if PG_DSN:
+    if BACKEND == "redis":
+        raw = _tcp().get(key)
+    elif BACKEND == "upstash":
+        raw = _rest("GET", key)
+    else:
         row = _pg("SELECT v FROM mirrai_kv WHERE k = %s AND exp > now()", (key,), fetch=True)
-        return json.loads(row[0]) if row else None
-    raw = _redis("GET", key)
+        raw = row[0] if row else None
     return json.loads(raw) if raw else None
 
 
 def delete(key):
-    if PG_DSN:
-        _pg("DELETE FROM mirrai_kv WHERE k = %s", (key,))
+    if BACKEND == "redis":
+        _tcp().delete(key)
+    elif BACKEND == "upstash":
+        _rest("DEL", key)
     else:
-        _redis("DEL", key)
+        _pg("DELETE FROM mirrai_kv WHERE k = %s", (key,))
 
 
 def incr(key, ttl):
-    if PG_DSN:  # atomic counter; restarts at 1 once the previous window has expired
-        row = _pg("INSERT INTO mirrai_kv (k, v, exp) VALUES (%s, '1', now() + make_interval(secs => %s::float8)) "
-                  "ON CONFLICT (k) DO UPDATE SET "
-                  "v = CASE WHEN mirrai_kv.exp < now() THEN '1' ELSE (mirrai_kv.v::int + 1)::text END, "
-                  "exp = CASE WHEN mirrai_kv.exp < now() THEN excluded.exp ELSE mirrai_kv.exp END "
-                  "RETURNING v", (key, ttl), fetch=True)
-        return int(row[0])
-    n = int(_redis("INCR", key))
-    if n == 1:
-        _redis("EXPIRE", key, ttl)
-    return n
+    if BACKEND == "redis":
+        n = _tcp().incr(key)
+        if n == 1:
+            _tcp().expire(key, ttl)
+        return n
+    if BACKEND == "upstash":
+        n = int(_rest("INCR", key))
+        if n == 1:
+            _rest("EXPIRE", key, ttl)
+        return n
+    row = _pg("INSERT INTO mirrai_kv (k, v, exp) VALUES (%s, '1', now() + make_interval(secs => %s::float8)) "
+              "ON CONFLICT (k) DO UPDATE SET "
+              "v = CASE WHEN mirrai_kv.exp < now() THEN '1' ELSE (mirrai_kv.v::int + 1)::text END, "
+              "exp = CASE WHEN mirrai_kv.exp < now() THEN excluded.exp ELSE mirrai_kv.exp END "
+              "RETURNING v", (key, ttl), fetch=True)
+    return int(row[0])

@@ -22,7 +22,8 @@ class handler(BaseHTTPRequestHandler):
                     "model": core.MODEL, "products": sorted(core.PRODUCT_FILES),
                     "looks": {k: sorted(v) for k, v in core.LOOKS.items()},
                     "store": "postgres" if store.PG_DSN else ("redis" if store.REDIS_URL else None),
-                    "key": bool(core.KEY)}  # whether OPENAI_API_KEY is set — never the value
+                    "key": bool(core.KEY),  # whether OPENAI_API_KEY is set — never the value
+                    "store_env": store.env_names()}  # variable names only, to diagnose the storage connection
         data = json.dumps(body).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")

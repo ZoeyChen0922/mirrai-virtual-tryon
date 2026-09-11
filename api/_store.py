@@ -8,9 +8,26 @@ Backends, whichever is configured (both come from Vercel Marketplace integration
 import json, os
 import requests
 
-PG_DSN = os.environ.get("POSTGRES_URL") or os.environ.get("DATABASE_URL")
-REDIS_URL = os.environ.get("KV_REST_API_URL") or os.environ.get("UPSTASH_REDIS_REST_URL")
-REDIS_TOKEN = os.environ.get("KV_REST_API_TOKEN") or os.environ.get("UPSTASH_REDIS_REST_TOKEN")
+def _env(*names, suffixes=()):
+    """Exact names first, then any variable ending with a suffix — Vercel lets users add a custom prefix when connecting."""
+    for n in names:
+        if os.environ.get(n):
+            return os.environ[n]
+    for k, v in sorted(os.environ.items()):
+        if v and any(k.endswith(s) for s in suffixes):
+            return v
+    return None
+
+
+PG_DSN = _env("POSTGRES_URL", "DATABASE_URL", suffixes=("_POSTGRES_URL", "_DATABASE_URL"))
+REDIS_URL = _env("KV_REST_API_URL", "UPSTASH_REDIS_REST_URL", suffixes=("_REST_API_URL", "_REDIS_REST_URL"))
+REDIS_TOKEN = _env("KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN", suffixes=("_REST_API_TOKEN", "_REDIS_REST_TOKEN"))
+
+
+def env_names():
+    """Names (never values) of storage-looking variables, for diagnosing the Vercel setup."""
+    keys = ("DATABASE", "POSTGRES", "PG", "REDIS", "KV_", "UPSTASH", "NEON", "STORAGE")
+    return sorted(k for k in os.environ if any(t in k for t in keys))
 
 
 def available():

@@ -4,7 +4,9 @@
 
 ## 在线体验
 
-GitHub Pages：`https://<username>.github.io/<repo>/prototype/`（发布后替换为实际地址）
+**https://zoeychen0922.github.io/mirrai-virtual-tryon/prototype/**
+
+手机页、演示官网也在同一站点下；在大屏效果页扫码即可用手机打开。
 
 线上版使用 8 套预生成的试穿图演示完整流程。真实的"拍脸 + 按身高尺码生成"需要在本地运行服务端（见下文）。
 

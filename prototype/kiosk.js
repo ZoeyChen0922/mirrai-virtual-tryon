@@ -233,7 +233,7 @@ const VIEWS = {
       ? `<div class="fallback"><div class="flats">${items.map(p => `<img src="assets/products/${p.img}" alt="">`).join('')}</div>
           <p>${state.fallback === 'offline' ? t('网络暂时不可用，先看看官方商品图。你的选择已保存。', "We're offline — here are the product photos. Your picks are saved.")
             : state.fallback === 'nomatch' ? t('这套搭配的上身效果还在准备中，先看看官方商品图。', 'The try-on for this combination is still on its way — here are the product photos.')
-              + `<br><small style="color:#8a8a8a;font-size:22px">${t('（演示提示：未连接生成服务，只有 6 套精选搭配有预生成效果图。请运行 tools/server.py 并打开 localhost:4174）', '(Demo: generation service not connected — only the 6 curated looks have pre-rendered images. Run tools/server.py and open localhost:4174)')}</small>`
+              + `<br><small style="color:#8a8a8a;font-size:22px">${t(`（线上演示版：已预生成 ${LOOKS.length} 套搭配的上身效果；本地运行生成服务可实时生成任意搭配）`, `(Online demo: ${LOOKS.length} looks are pre-rendered; run the local generation service to render any combination live)`)}</small>`
             : t('这次没有生成成功，已自动重试。先看看官方商品图，你的选择都还在。', "That didn't work, even after a retry. Here are the product photos — your picks are saved.")}</p></div>`
       : `<img src="${state.resultImg || `assets/tryon/${state.look.id}_${g}.webp`}" alt="try-on result"><span class="badge">AI PREVIEW</span>
          <span class="demo">${state.resultImg && isPhoto(state.face) ? t('由你的照片生成', 'Generated from your photo')

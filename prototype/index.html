@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIRRAI — AI 虚拟试衣大屏原型</title>
+  <link rel="stylesheet" href="./shell.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="stage">
+      <div class="kiosk-frame" id="kioskFrame">
+        <iframe id="kiosk" src="kiosk.html" title="Kiosk 1080 × 1920" allow="camera; fullscreen"></iframe>
+      </div>
+      <p class="spec">55" portrait · 1080 × 1920 · scaled to fit</p>
+    </section>
+
+    <aside class="panel">
+      <header>
+        <p class="label">Interactive prototype · v1.0</p>
+        <h1>MIRRAI</h1>
+        <p class="api" id="apiStatus" hidden></p>
+      </header>
+
+      <div class="block tools">
+        <p class="label">演示工具</p>
+        <button data-tool="restart">从头演示</button>
+        <button data-tool="scan">模拟扫码 · 打开手机页</button>
+        <button data-tool="idle">快进 60 秒无操作</button>
+        <button data-tool="full">大屏全屏</button>
+      </div>
+      <div class="block">
+        <p class="label">当前旅程</p>
+        <ol class="journey" id="journey">
+          <li data-s="attract">P0 待机视频</li><li data-s="face">P1 拍脸</li><li data-s="profile">P2 身形信息</li><li data-s="gallery">P3 选款画廊</li>
+          <li data-s="generating">P4 生成中</li><li data-s="result">P5 效果页</li><li data-s="handoff">P6 扫码交接</li><li data-s="done">P7 清空</li>
+        </ol>
+      </div>
+      <details class="block">
+        <summary class="label">埋点事件</summary>
+        <ol class="events" id="events"><li class="muted">等待操作…</li></ol>
+      </details>
+      <p class="foot">AI 生成、库存、领券、叫店员与下单均为模拟；照片只在本机内存中处理，不上传、不存储。<br>全部商品与试穿图均由 AI 生成，商品、价格与"官网"均为演示内容。</p>
+    </aside>
+  </main>
+
+  <dialog id="phone" class="phone">
+    <button class="close" id="closePhone" aria-label="关闭">×</button>
+    <iframe id="phoneFrame" title="Phone"></iframe>
+  </dialog>
+  <div id="toast" hidden></div>
+  <script src="./shell.js"></script>
+</body>
+</html>

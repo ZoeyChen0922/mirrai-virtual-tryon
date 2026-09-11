@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIRRAI · Kiosk</title>
+  <link rel="stylesheet" href="./kiosk.css" />
+</head>
+<body>
+  <!-- 1080 × 1920 logical canvas (55" portrait). Scaled to fit any window; scale = 1 on the real screen. -->
+  <div id="app">
+    <div id="screen"></div>
+    <div id="overlay" hidden></div>
+    <div id="toast" hidden></div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="./data.js"></script>
+  <script src="./kiosk.js"></script>
+</body>
+</html>

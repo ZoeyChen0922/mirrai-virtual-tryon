@@ -1,0 +1,20 @@
+# secrets
+.env
+
+# local tooling / OS
+.DS_Store
+.claude/
+__pycache__/
+*.pyc
+
+# backups and intermediate generation folders (kept locally only)
+backups/
+prototype_v0.1_codex/
+prototype/assets/v2-review/
+prototype/assets/v2-final/
+prototype/assets/v3-model/
+prototype/v2-review.html
+HANDOFF_TO_CLAUDE.md
+
+# third-party product photos used in early drafts (copyrighted, not redistributed)
+上衣&下装/

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIRRAI 官网（演示）</title>
+  <link rel="stylesheet" href="./m.css" />
+  <style>
+    .demo-bar { background: #111; color: #fff; font-size: 11px; letter-spacing: .08em; text-align: center; padding: 8px; }
+    .shop-img { display: block; width: calc(100% - 40px); margin: 14px 20px 0; aspect-ratio: 2 / 3; object-fit: cover; background: #f0efec; }
+    .sizes { display: flex; gap: 8px; margin: 16px 0 4px; flex-wrap: wrap; }
+    .sizes button { min-width: 48px; height: 40px; border: 1px solid #cfccc6; background: #fff; font-size: 13px; }
+    .sizes button.on { background: #111; color: #fff; border-color: #111; }
+  </style>
+</head>
+<body>
+  <!-- Demo brand store: where "Buy online" lands. Not a real shop — no payment, nothing is stored. -->
+  <div class="demo-bar">演示页面 · 模拟品牌官网商品页，不会真实下单</div>
+  <main id="shop"></main>
+  <div id="toast" hidden></div>
+  <script src="./data.js"></script>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const p = PRODUCTS.find(x => x.id === q.get('id')) || PRODUCTS[0];
+    const zh = (q.get('lang') || navigator.language || 'zh').startsWith('zh'); // follow the phone page's language
+    const t = (a, b) => (zh ? a : b);
+    let size = 'M';
+    function render() {
+      document.getElementById('shop').innerHTML = `
+        <header class="head"><span class="logo">MIRRAI</span><span class="label">${t('官方商城', 'Online store')}</span></header>
+        <img class="shop-img" src="assets/products/${p.img}" alt="">
+        <div class="detail"><h1>${zh ? p.zh : p.en}</h1><div class="price">${money(p.price)}</div><p>${p.note[zh ? 'zh' : 'en']}</p>
+          <div class="sizes">${['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'].map(s => `<button class="${s === size ? 'on' : ''}" data-s="${s}">${s}</button>`).join('')}</div>
+          <p class="label" style="margin-top:10px">${q.get('store') ? t('来自门店 ', 'Referred by store ') + q.get('store') + ' · ' + t('业绩计入该门店', 'credited to that store') : ''}</p>
+        </div>
+        <div class="actions"><button class="btn primary" data-a="bag">${t('加入购物袋', 'Add to bag')}</button></div>
+        <p class="foot">${t('本页为笔试原型的演示页面，商品与价格均为虚构。', 'Demo page for a design-exercise prototype; products and prices are fictional.')}</p>`;
+    }
+    document.addEventListener('click', e => {
+      const s = e.target.closest('[data-s]'); if (s) { size = s.dataset.s; render(); }
+      if (e.target.closest('[data-a="bag"]')) {
+        const el = document.getElementById('toast'); el.textContent = t(`已加入购物袋（${size} 码，演示）`, `Added to bag (size ${size}, demo)`);
+        el.hidden = false; setTimeout(() => (el.hidden = true), 2400);
+      }
+    });
+    render();
+  </script>
+</body>
+</html>

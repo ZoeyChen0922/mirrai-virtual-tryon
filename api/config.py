@@ -12,6 +12,16 @@ except Exception:
     LOAD_ERROR = traceback.format_exc()[-1200:]
 
 
+def missing_assets():
+    """Files generation reads at runtime; they must be bundled into the function via vercel.json includeFiles."""
+    need = [core.TRYON / f"base_{s}.png" for s in ("M", "XL")]
+    need += [core.TRYON / f"{l}_{s}.png" for l in core.LOOKS for s in ("M", "XL")]
+    need += [core.PRODUCTS / f for f, _ in core.PRODUCT_FILES.values()]
+    need += [core.WEB / "assets" / "shoes" / f"{k}.png" for k in ("sneaker", "boot", "loafer")]
+    missing = [str(p.relative_to(core.ROOT)) for p in need if not p.exists()]
+    return {"count": len(missing), "of": len(need), "sample": missing[:4]}
+
+
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if LOAD_ERROR:
@@ -23,7 +33,8 @@ class handler(BaseHTTPRequestHandler):
                     "looks": {k: sorted(v) for k, v in core.LOOKS.items()},
                     "store": store.BACKEND,
                     "key": bool(core.KEY),  # whether OPENAI_API_KEY is set — never the value
-                    "store_env": store.env_names()}  # variable names only, to diagnose the storage connection
+                    "store_env": store.env_names(),  # variable names only, to diagnose the storage connection
+                    "missing_assets": missing_assets()}
         data = json.dumps(body).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")

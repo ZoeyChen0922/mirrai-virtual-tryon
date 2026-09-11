@@ -21,6 +21,7 @@ class handler(Base):
         except Exception as e:  # never leak details to the kiosk
             sys.stderr.write(f"generation failed: {e}\n")
             store.put(f"res:{sid}", {"t": t, "status": "error"})
-            return self.send_json(502, {"error": "generation_failed"})
+            # error type + short message only (no secrets) so failures can be diagnosed without the Vercel logs
+            return self.send_json(502, {"error": "generation_failed", "detail": f"{type(e).__name__}: {str(e)[:160]}"})
         store.put(f"res:{sid}", {"t": t, "status": "ready", "image": image})  # expires after 24h
         self.send_json(200, {"image": image})

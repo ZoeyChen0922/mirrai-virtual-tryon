@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>MIRRAI 产品方案</title>
+<style>
+@page { size: A4; margin: 8mm 10mm; }
+* { box-sizing: border-box; margin: 0; }
+body { font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif; color: #111; font-size: 8pt; line-height: 1.42; width: 190mm; margin: 0 auto; }
+header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.2pt solid #111; padding-bottom: 2.5pt; }
+h1 { font-size: 13pt; letter-spacing: .06em; font-weight: 600; }
+h1 small { font-size: 8pt; font-weight: 400; color: #555; letter-spacing: 0; margin-left: 5pt; }
+.links { text-align: right; font-size: 6.8pt; color: #444; line-height: 1.35; }
+h2 { font-size: 8.8pt; letter-spacing: .05em; margin: 5pt 0 1.5pt; padding-left: 4pt; border-left: 2.2pt solid #111; }
+h3 { font-size: 7.6pt; margin: 0 0 1pt; }
+.lead { color: #333; margin-bottom: 2pt; }
+b { font-weight: 600; }
+ul { padding-left: 10pt; }
+li { margin-bottom: .5pt; }
+.src { color: #777; font-size: 6.5pt; }
+table { width: 100%; border-collapse: collapse; font-size: 7.5pt; line-height: 1.36; }
+th, td { border: .5pt solid #cfcbc3; padding: 1.6pt 3.5pt; vertical-align: top; text-align: left; }
+th { background: #f1efea; font-weight: 600; }
+td.cat { background: #faf9f6; font-weight: 600; white-space: nowrap; text-align: center; vertical-align: middle; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 7pt; }
+.box { border: .5pt solid #cfcbc3; padding: 2.5pt 5pt; }
+svg { width: 100%; height: auto; display: block; margin: 1pt 0 0; }
+.gap { margin-top: 2pt; }
+footer { margin-top: 3pt; font-size: 6.3pt; color: #777; }
+</style></head><body>
+<header>
+  <h1>MIRRAI<small>商场门店 AI 虚拟试衣大屏 · 产品方案</small></h1>
+  <div class="links">在线体验：mirrai-virtual-tryon.vercel.app<br>源代码：github.com/ZoeyChen0922/mirrai-virtual-tryon</div>
+</header>
+
+<h2>1 目标用户与痛点</h2>
+<p class="lead">顾客去门店试衣，本质是想<b>在付款前确认"合身、好看"</b>。这一步只有两类成本：时间成本（试衣效率低）和心理成本（缺乏信心）。我们从这两类成本最高的人群和场景切入。</p>
+<p><b>核心用户：22–35 岁女性，周末或下班后在 ZARA、优衣库这类快时尚门店逛店。</b>这类门店款多、上新快，高峰时段客流集中。<span class="src">（购物中心客流中 25–39 岁占 50.1%，CBNData / 赢商大数据，2026）</span></p>
+<div class="two gap">
+  <div class="box"><h3>痛点 A · 试衣效率低</h3><ul>
+    <li><b>A1 排队：</b>周末和晚间高峰，试衣间门口排长队；想试的越多，排的次数越多。</li>
+    <li><b>A2 环境差：</b>隔间小，灯光和镜子失真，看不到整套搭配的效果。</li>
+    <li><b>A3 款多时间少：</b>只能一件件拿、一件件换，逛很久也只试了几件。</li></ul></div>
+  <div class="box"><h3>痛点 B · 缺乏信心</h3><ul>
+    <li><b>B1 大码不好意思报尺码：</b>当着导购说码数，或被一句"您可能穿不下"当面否定，都很难堪。</li>
+    <li><b>B2 试了不买会尴尬：</b>导购一直在旁边，试完不好意思走，于是"将就买一件"或干脆不试。</li></ul></div>
+</div>
+<table class="gap">
+  <tr><th style="width:56%">核心数据</th><th>来源与调研条件</th></tr>
+  <tr><td><b>36% 的人因试衣体验差放弃购买</b>；39% 试衣时有负面情绪（女性 49%），主要原因是空间不足、被催促</td><td>Zalando × YouGov，2024 年 6 月，欧洲 12 国 14,609 名成年人</td></tr>
+  <tr><td><b>中码、大码女性更需要店员建议，却更不愿开口问</b>，试穿信心也更低</td><td>Seekis 等，<i>J. Fashion Marketing &amp; Mgmt</i>，2024 年 9 月，642 名女性</td></tr>
+  <tr><td><b>购物者平均每天只花 43 分钟购物，比 2018 年少 37 分钟</b></td><td>国家统计局第三次全国时间利用调查，2024 年 5 月，10.7 万人</td></tr>
+</table>
+
+<h2>2 核心流程：顾客与系统的交互</h2>
+<p class="lead">设计原则是<b>把"试"从试衣间里拿出来</b>：先在大屏上快速看完多套上身效果，只把真正想买的带进试衣间，或直接扫码下单。顾客<b>全程不用开口报尺码</b>，导购只在被叫时出现；AI 在顾客挑衣服时就在后台生成，把等待时间藏起来。</p>
+<svg id="journey" viewBox="0 0 1000 236" xmlns="http://www.w3.org/2000/svg"></svg>
+<p class="src">黑框为顾客动作；实线为交互，虚线为同时进行或自动触发；圆圈是步骤顺序，框内 A1–B2 对应所解决的痛点。</p>
+
+<h2>3 大屏与手机端分工</h2>
+<p class="lead">两块屏按<b>停留时间</b>分工。大屏在公共场所，顾客只停留 3–5 分钟，负责店内的<b>中段旅程</b>：快速看效果、选定款式。手机是私人设备，扫码后 24 小时内都能慢慢看，负责离店前后的<b>长段旅程</b>：决策与成交。凡是涉及个人信息、付款、反复比较的环节，都放到手机上。</p>
+<div class="two">
+<table>
+  <tr><th colspan="2">中段旅程 · 大屏（店内 3–5 分钟）</th></tr>
+  <tr><td style="width:17%"><b>进入</b></td><td>轮播吸引，点击开始；写明"无需登录 · 拍照可选 · 离开即清除"</td></tr>
+  <tr><td><b>形象</b></td><td>拍脸或跳过；自己点选身高和尺码，不用说出口（B1）。姿态可以更好看，但不改尺码</td></tr>
+  <tr><td><b>选款</b></td><td>画廊组合上下装或连衣裙，一次看多套（A3）；只展示本店在售款并标价；形象在后台生成</td></tr>
+  <tr><td><b>等待</b></td><td>约 30 秒，显示进度和 3 套推荐搭配；超过 15 秒提示"先扫码"，不用干等（A1）</td></tr>
+  <tr><td><b>效果</b></td><td>整套上身效果替代试衣间（A2），显示货架位置和库存；大屏上没有外链，也不做支付</td></tr>
+</table>
+<table>
+  <tr><th colspan="2">长段旅程 · 手机（扫码后 24 小时内）</th></tr>
+  <tr><td style="width:17%"><b>保存</b></td><td>保存试穿图、领门店券；私人链接只有本人可见，24 小时后失效</td></tr>
+  <tr><td><b>了解</b></td><td>单品详情，按大屏上选的尺码给出建议，同时显示库存和货架</td></tr>
+  <tr><td><b>店内成交</b></td><td>主按钮"叫店员送尺码到试衣间"：不用当面报码，也不用导购全程陪同（B1、B2）</td></tr>
+  <tr><td><b>线上成交</b></td><td>"去官网购买"是次按钮，本店缺货时升为主按钮；链接带门店参数，业绩计入门店</td></tr>
+  <tr><td><b>分享 / 删除</b></td><td>分享海报默认不带人像；试穿记录随时可以删除</td></tr>
+</table>
+</div>
+
+<h2>4 异常及隐私处理</h2>
+<p class="lead">AI 生成慢、可能失败，商场网络也不稳定，所以<b>任何异常都不能让顾客面对空白或技术报错</b>：先自动补救，再降级到"至少能看到商品"。人脸属于敏感个人信息，按数据生命周期处理：<b>能不采集就不采集，采集了只用一次、尽快删除</b>。</p>
+<div class="two">
+<table>
+  <tr><th colspan="2">异常处理</th></tr>
+  <tr><td style="width:27%"><b>生成超过 15 秒</b></td><td>提示"不想等？先扫码"，结果生成后自动出现在手机上</td></tr>
+  <tr><td><b>生成失败</b></td><td>自动重试 1 次；仍失败就展示官方商品图，已选的衣服保留</td></tr>
+  <tr><td><b>断网</b></td><td>展示本地缓存的商品图和货号，可以找店员</td></tr>
+  <tr><td><b>拍脸不合格</b></td><td>没检测到人脸、多张脸或太暗时给出提示；没有摄像头时直接走跳过流程</td></tr>
+  <tr><td><b>60 秒无操作</b></td><td>提示"还在吗？"，10 秒后清空照片、尺码和已选的衣服</td></tr>
+</table>
+<table>
+  <tr><th colspan="2">隐私处理（按数据生命周期）</th></tr>
+  <tr><td style="width:22%"><b>采集</b></td><td>拍照前单独征得同意，可一键跳过；不问体重，不拍全身</td></tr>
+  <tr><td><b>使用</b></td><td>照片只用于本次生成，不用于训练；API Key 只放在服务端</td></tr>
+  <tr><td><b>展示</b></td><td>大屏不长时间放大真人照片；分享海报默认不带人像</td></tr>
+  <tr><td><b>传输</b></td><td>二维码只含款式、尺码和随机令牌，不含人脸</td></tr>
+  <tr><td><b>存储与删除</b></td><td>原图不保存；结果 24 小时后自动删除；手机端可随时删除，大屏清除时同步删除</td></tr>
+</table>
+</div>
+<footer>原型中的商品、模特和试穿图均为 AI 生成的虚构内容。调研证据、决策记录和测试记录见 GitHub 仓库。</footer>
+
+<script>
+// Swimlane journey: who hands what to whom. Inline SVG so it prints crisply in the PDF.
+const lanes = ['顾客', '大屏', 'AI 生成服务', '手机', '店员'];
+const LH = 45, TOP = 4, X0 = 96, DX = 82, BW = 77, BH = 36;
+const nodes = [
+  [0, 0, '被轮播吸引<br>点开始'],
+  [1, 1, '拍照说明<br>（可跳过）'],
+  [2, 0, '拍脸或跳过<br>选身高尺码 B1'],
+  [3, 2, '后台生成<br>专属形象'],
+  [3, 0, '画廊选款<br>多套对比 A3'],
+  [4, 1, '等待：推荐3套<br>可先扫码 A1'],
+  [5, 2, '生成上身效果<br>脸·身形·衣·鞋'],
+  [6, 1, '效果图 A2<br>货架·库存'],
+  [7, 0, '看效果<br>扫码带走'],
+  [8, 3, '取回试穿图<br>领券'],
+  [8, 1, '5 秒后<br>自动清空'],
+  [9, 3, '叫店员送尺码<br>或官网购买'],
+  [10, 4, '送尺码到<br>试衣间 B1 B2'],
+  [10, 3, '分享 · 删除']
+];
+const edges = [[0,1],[1,2],[2,3,'dash'],[2,4],[4,5],[5,6],[6,7],[7,8],[8,9],[8,10,'dash'],[9,11],[11,12],[11,13]];
+const svg = document.getElementById('journey');
+const cx = n => X0 + nodes[n][0] * DX + BW / 2, cy = n => TOP + nodes[n][1] * LH + LH / 2;
+let s = '<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#111"/></marker></defs>';
+lanes.forEach((l, i) => {
+  s += `<rect x="0" y="${TOP + i * LH}" width="1000" height="${LH}" fill="${i % 2 ? '#fff' : '#f6f5f2'}"/>`;
+  s += `<text x="10" y="${TOP + i * LH + LH / 2 + 4}" font-size="12" font-weight="600" fill="#111">${l}</text>`;
+});
+s += `<line x1="86" y1="${TOP}" x2="86" y2="${TOP + lanes.length * LH}" stroke="#cfcbc3"/>`;
+edges.forEach(([a, b, d]) => {
+  const fwd = nodes[b][0] > nodes[a][0], down = cy(b) > cy(a);
+  const x1 = cx(a) + (fwd ? BW / 2 : 0), y1 = cy(a) + (fwd ? 0 : (down ? BH / 2 : -BH / 2));
+  const x2 = cx(b) - (fwd ? BW / 2 : 0), y2 = cy(b) - (fwd ? 0 : (down ? BH / 2 : -BH / 2));
+  s += `<path d="M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}" fill="none" stroke="#111" stroke-width="1.2" ${d ? 'stroke-dasharray="4 3"' : ''} marker-end="url(#ar)"/>`;
+});
+nodes.forEach(([c, l, t], i) => {
+  const x = X0 + c * DX, y = TOP + l * LH + (LH - BH) / 2;
+  s += `<rect x="${x}" y="${y}" width="${BW}" height="${BH}" fill="${l === 0 ? '#111' : '#fff'}" stroke="#111" stroke-width="1"/>`;
+  s += `<circle cx="${x}" cy="${y}" r="7" fill="#fff" stroke="#111"/><text x="${x}" y="${y + 3}" font-size="8" text-anchor="middle">${i + 1}</text>`;
+  t.split('<br>').forEach((line, k) => {
+    s += `<text x="${x + BW / 2}" y="${y + 15 + k * 12}" font-size="8.6" text-anchor="middle" fill="${l === 0 ? '#fff' : '#111'}">${line}</text>`;
+  });
+});
+svg.innerHTML = s;
+</script>
+</body></html>

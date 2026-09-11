@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>MIRRAI AI 工具使用说明</title>
+<style>
+@page { size: A4; margin: 9mm 12mm; }
+* { box-sizing: border-box; margin: 0; }
+body { font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif; color: #111; font-size: 8.2pt; line-height: 1.42; }
+header { border-bottom: 1.5pt solid #111; padding-bottom: 4pt; margin-bottom: 6pt; display: flex; justify-content: space-between; align-items: flex-end; }
+h1 { font-size: 15pt; letter-spacing: .04em; font-weight: 600; }
+header span { font-size: 7.6pt; color: #555; }
+h2 { font-size: 10pt; margin: 6pt 0 3pt; padding-left: 5pt; border-left: 2.5pt solid #111; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 3pt; }
+th, td { border: .5pt solid #cfcbc3; padding: 2.6pt 4.5pt; vertical-align: top; text-align: left; }
+th { background: #f1efea; font-weight: 600; }
+blockquote { background: #f6f5f2; border-left: 2pt solid #999; padding: 3pt 6pt; margin: 3pt 0 2pt; font-size: 8pt; font-family: Menlo, "PingFang SC", monospace; line-height: 1.45; }
+.why { color: #555; font-size: 8pt; margin-bottom: 3pt; }
+.k { font-weight: 600; }
+b { font-weight: 600; }
+.foot { margin-top: 7pt; background: #f6f5f2; padding: 5pt 7pt; font-size: 8.2pt; }
+</style></head><body>
+<header><h1>AI 工具使用说明</h1><span>MIRRAI · 商场门店 AI 虚拟试衣大屏</span></header>
+
+<h2>一、使用的工具</h2>
+<table>
+  <tr><th style="width:27%">工具</th><th>用途</th></tr>
+  <tr><td>Claude Code（Claude Opus 5）</td><td>选题与考点拆解、方案讨论、调研汇总；原型前端、生成服务的开发与自测；素材生成脚本</td></tr>
+  <tr><td>Claude Code 子 Agent × 6</td><td>两轮并行案头调研：每轮 3 个 Agent 分别查中文平台、海外行业报告、学术研究，独立检索后交叉验证</td></tr>
+  <tr><td>Codex（GPT-5）</td><td>原型 v0.1 初版；按我逐项确认的意见重做一版试穿图</td></tr>
+  <tr><td>OpenAI gpt-image-2</td><td>生成虚构模特、单品图、鞋履、试穿图；原型中按用户的人脸、身高、尺码实时生成上身效果</td></tr>
+  <tr><td>MediaPipe Face Detector</td><td>浏览器端检测无人脸、多张脸，照片不上传</td></tr>
+</table>
+
+<h2>二、关键提示词</h2>
+<p class="k">1. 调研：让 AI 验证，而不是迎合</p>
+<blockquote>我们的假设需要验证，也可能被推翻……只用 2023 年以后的数据；每条数据附具体 URL 并打开原文核实；严禁编造；UGC 只作定性原声，不能当比例。</blockquote>
+<p class="why">三个 Agent 用同一份问题清单、侧重不同来源，保证交叉验证彼此独立；最终剔除厂商软文、自媒体和疫情期数据。</p>
+
+<p class="k">2. 人脸与身体融合（三组对比实验后定稿）</p>
+<blockquote>Use the face photo only as an identity reference… Do not copy its camera angle, crop, lighting… Re-render her head naturally… a natural neck that connects smoothly into the shoulders… one consistent skin tone… a single photograph taken in one shot, not a composite.</blockquote>
+<p class="why">初版写"把顾客的脸给她"，模型直接把自拍的头贴到身体上。改为"以照片为身份参考、重画整个人"后，头身比例与衔接明显自然；一次生成也比先建形象再换衣服更稳（28 秒 vs 52 秒，且不会漂脸）。</p>
+
+<p class="k">3. 身形参数与"好看但诚实"</p>
+<blockquote>Body specification: a woman, {身高} cm, size {尺码} ({体型描述})… fixed studio scale: the top edge is 200 cm above the floor… flattering only through posture, proportion, camera and fit — do not slim her or change her size.</blockquote>
+<p class="why">让同是 M 码的 160cm 和 175cm 在图中看得出区别；美化只作用于姿态和镜头，避免"试穿好看、回家不像"。</p>
+
+<p class="k">4. 素材一致性</p>
+<p class="why">先生成试穿图，再从试穿图中提取单品图；XL 版本以同一张 M 码图为参考，保证画廊、效果图和手机详情是同一件衣服。脚本内置限速，避开账户每分钟 5 张参考图的限额。</p>
+
+<h2>三、本人完成的主要修改</h2>
+<table>
+  <tr><th style="width:4%">#</th><th style="width:24%">AI 的初版</th><th style="width:38%">我的判断与修改</th><th>结果</th></tr>
+  <tr><td>1</td><td>核心用户是"年轻女性"</td><td>要求 3 个 Agent 交叉验证；指出数据过旧、用户切得太粗，要求落到"人群 × 场景 × 痛点"</td><td>"午休上班族"等假设被数据推翻；最终定为 22–35 岁快时尚逛店女性 × 效率、信心两类痛点，每条数据标明来源和调研条件</td></tr>
+  <tr><td>2</td><td>Codex 原型声称按 1080×1920 设计，实际约 373px 宽</td><td>先讨论竖屏尺寸与安装高度，再动手</td><td>真实 1080×1920 画布；按离地高度划分展示区与触控区</td></tr>
+  <tr><td>3</td><td>预设体型卡片 + 人台脸</td><td>参考竞品改为"拍脸 + 身高 + 尺码"：问体重不礼貌，拍全身既不礼貌 Demo 也难做</td><td>真实的脸 + 按尺码生成的身体，配单独同意、可跳过、不留存</td></tr>
+  <tr><td>4</td><td>拍照后效果图仍是示例人脸</td><td>指出这是最大问题，要求接入真实生成</td><td>新增服务端，Key 不进网页；约 30 秒出图，隐私文案如实改写</td></tr>
+  <tr><td>5</td><td>头和身体像拼接</td><td>追问提示词，要求用对比实验验证</td><td>三组对比后改为"以照片为身份参考、重画整个人"</td></tr>
+  <tr><td>6</td><td>身高、尺码没有体现在图里</td><td>要求同为 M 码，160 与 165 也要有区别；在真实基础上尽量好看</td><td>加入身形参数与固定标尺；只调姿态比例，不改尺码</td></tr>
+  <tr><td>7</td><td>部分单品不好看；想用博主照片做模特</td><td>提供风格参考图；接受 AI"真人肖像未经授权"的提醒，改用虚构模特；先看 2 张样图再全量生成</td><td>美式复古街头风 8 套，全部为虚构款，不再使用任何品牌图片</td></tr>
+  <tr><td>8</td><td>演示面板堆满说明和情景按钮</td><td>考点对应与边界情况改为文字说明，页面只留与流程相关的内容</td><td>面板精简；补充推荐套装、鞋履搭配、演示官网等转化环节</td></tr>
+</table>
+<div class="foot"><b>方法上的体会：</b>用多个 Agent 独立检索、交叉验证，而不是让一个 AI 直接给结论；AI 给出的数据经过排除清单筛选；每个重要改动先看样例或做对比实验，再全量执行；所有用户旅程用例跑通后才发布。</div>
+</body></html>

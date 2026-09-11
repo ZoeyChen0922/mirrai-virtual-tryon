@@ -408,7 +408,7 @@ function startAvatarJob() {
   }, 200);
   if (real) {
     fetch('/api/avatar', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ face: isPhoto(state.face) ? state.face : null, ...bodyParams() }) })
+      body: JSON.stringify({ sid: state.sid, face: isPhoto(state.face) ? state.face : null, ...bodyParams() }) })
       .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
       .then(d => state.sid === sid && done(d.image))
       .catch(() => { if (state.sid === sid) { emit('avatar_fallback'); done(null); } });

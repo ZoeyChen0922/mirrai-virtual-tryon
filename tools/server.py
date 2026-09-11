@@ -19,9 +19,10 @@ PORT = int(os.environ.get("PORT", 4174))
 MODEL = "gpt-image-2"
 TTL = 24 * 3600
 
-KEY = next((l.split("=", 1)[1].strip() for l in (ROOT / ".env").read_text().splitlines() if l.startswith("OPENAI_API_KEY=")), None)
-if not KEY:
-    sys.exit("OPENAI_API_KEY missing in .env")
+# Vercel passes the key as an environment variable; locally it comes from ../.env.
+KEY = os.environ.get("OPENAI_API_KEY") or next(
+    (l.split("=", 1)[1].strip() for l in ((ROOT / ".env").read_text().splitlines() if (ROOT / ".env").exists() else [])
+     if l.startswith("OPENAI_API_KEY=")), None)
 
 # Keep in sync with prototype/data.js (v3 — American-retro street looks, see tools/v3_build.py)
 LOOKS = {"L1": ["T7", "B9"], "L2": ["T8", "B10"], "L3": ["T9", "B11"], "L4": ["T10", "B12"], "L5": ["T11", "B13"],
@@ -274,6 +275,8 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    if not KEY:
+        sys.exit("OPENAI_API_KEY missing in .env")
     handler = functools.partial(Handler, directory=str(WEB))
     print(f"MIRRAI demo server: http://localhost:{PORT}  (phone on same Wi-Fi: http://{lan_ip()}:{PORT})")
     ThreadingHTTPServer(("0.0.0.0", PORT), handler).serve_forever()

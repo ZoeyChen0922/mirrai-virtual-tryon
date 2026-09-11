@@ -1,5 +1,6 @@
-import hmac
-from _common import Base, store
+import hmac, os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Vercel does not put api/ on the import path
+from _common import Base, store  # noqa: E402
 
 
 class handler(Base):

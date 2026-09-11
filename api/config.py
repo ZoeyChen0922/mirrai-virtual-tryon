@@ -1,5 +1,7 @@
-import json, traceback
+import json, os, sys, traceback
 from http.server import BaseHTTPRequestHandler
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Vercel does not put api/ on the import path
 
 # If the shared modules fail to load (e.g. a file missing from the bundle), report why instead of crashing,
 # so the deployment can be diagnosed without access to the Vercel logs.

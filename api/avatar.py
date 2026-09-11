@@ -1,5 +1,6 @@
-import sys
-from _common import Base, core, shrink, within_limits
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Vercel does not put api/ on the import path
+from _common import Base, core, shrink, within_limits  # noqa: E402
 
 
 class handler(Base):
